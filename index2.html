@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Device Properties Example</title>
+
+    <script type="text/javascript" charset="utf-8" src="phonegap-1.1.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    // Wait for PhoneGap to load
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    var watchIDLoc = null;
+    var watchIDMag = null;
+
+    // PhoneGap is ready
+    //
+    function onDeviceReady() {
+        // Update every 3 seconds
+        var options = { frequency: 3000 };
+        watchIDLoc = navigator.geolocation.watchPosition(onGeoChange, onError, options);
+        watchIDMag = navigator.compass.watchHeading(onMagChange, onError, options);
+        
+    }
+    
+    function onClick() {
+        // Update every 3 seconds
+        watchIDLoc = navigator.geolocation.watchPosition(onGeoChange, onError, options);
+        watchIDMag = navigator.compass.watchHeading(onMagChange, onError, options);
+        
+    }
+
+    // onSuccess Geolocation
+    //
+    function onGeoChange(position) {
+        var element = document.getElementById('position');
+        element.innerHTML = 'Latitude: '  + position.coords.latitude      + '<br />' +
+                            'Longitude: ' + position.coords.longitude;
+    }
+    
+    function onMagChange(heading) {
+        var element = document.getElementById('heading');
+        element.innerHTML = 'Heading: ' + heading;
+    }
+
+    // onError Callback receives a PositionError object
+    //
+    function onError(error) {
+        alert('code: '    + error.code    + '\n' +
+              'message: ' + error.message + '\n');
+    }
+
+    </script>
+  </head>
+  <body>
+  	  Hello World<br>
+      <div id="position"></div>
+      <div id="heading"></div>
+  </body>
+</html>

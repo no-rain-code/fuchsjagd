@@ -1,52 +1,131 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Device Properties Example</title>
-
-    <script type="text/javascript" charset="utf-8" src="phonegap-1.1.0.js"></script>
-    <script type="text/javascript" charset="utf-8">
-
-    // Wait for PhoneGap to load
-    //
-    document.addEventListener("deviceready", onDeviceReady, false);
-
-    var watchIDLoc = null;
-    var watchIDMag = null;
-
-    // PhoneGap is ready
-    //
-    function onDeviceReady() {
-        // Update every 3 seconds
-        var options = { frequency: 3000 };
-        watchIDLoc = navigator.geolocation.watchPosition(onGeoChange, onError, options);
-        watchIDMag = navigator.compass.watchHeading(onMagChange, onError, options);
-        
-    }
-
-    // onSuccess Geolocation
-    //
-    function onGeoChange(position) {
-        var element = document.getElementById('position');
-        element.innerHTML = 'Latitude: '  + position.coords.latitude      + '<br />' +
-                            'Longitude: ' + position.coords.longitude;
-    }
-    
-    function onMagChange(heading) {
-        var element = document.getElementById('heading');
-        element.innerHTML = 'Heading: ' + heading;
-    }
-
-    // onError Callback receives a PositionError object
-    //
-    function onError(error) {
-        alert('code: '    + error.code    + '\n' +
-              'message: ' + error.message + '\n');
-    }
-
-    </script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <!--script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script-->
   </head>
-  <body>
-      <div id="position"></div>
-      <div id="heading"></div>
+  <body style="font: 75% Lucida Grande, Trebuchet MS;margin:0">
+    Latitude: <div id="lat">Loading Latitude...</div>
+    Longitude: <div id="lng">Loading Longitude...</div>
+    Bearing: <div id="bear">Loading Bearing...</div>
+    Distance: <div id="dis">Loading Distance...</div>
+    Heading: <div id="head">Loading Heading...</div>
+    <div id="err"></div>
+    <script>
+      var options = { frequency: 3000 };
+      // Schaffhausen 
+      //var searchPosition = { coords : { latitude : 47.707769, longitude : 8.641434 }};
+      // Basel 
+      var searchPosition = { coords : { latitude : 47.557422, longitude : 7.592572 }};
+      if (navigator.geolocation) {
+        var elementLat = document.getElementById('lat');
+        var elementLng = document.getElementById('lng');
+        var elementBear = document.getElementById('bear');
+        var elementDis = document.getElementById('dis');
+        elementLat.innerHTML = 'Loading Latitude..';
+        elementLng.innerHTML = 'Loading Longitude..';
+        elementBear.innerHTML = 'Loading Bearing..';
+        elementDis.innerHTML = 'Loading Distance..';
+        navigator.geolocation.getCurrentPosition(showPosition, onError);
+        // also monitor position as it changes
+        navigator.geolocation.watchPosition(showPosition);
+      } else {
+        onError();
+      }
+      
+      if (navigator.compass) {
+      	var elementHead = document.getElementById('head');
+      	elementHead.innerHTML = 'Loading Heading';
+      	navigator.compass.getCurrentHeading(showHeading, onErrorHeading, options);
+      	// also monitor heading as it changes
+      	navigator.compass.watchHeading(showHeading, onErrorHeading, options);
+      } else {
+        onErrorHeading();
+      }
+      
+      function showPosition(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        var elementLat = document.getElementById('lat');
+        var elementLng = document.getElementById('lng');
+        elementLat.innerHTML = lat;
+        elementLng.innerHTML = lng;
+        var bearing = calculateBearing(position, searchPosition);
+        var elementBear = document.getElementById('bear');
+        elementBear.innerHTML = bearing;
+        var distance = calculateDistance(position, searchPosition);
+        var elementDis = document.getElementById('dis');
+        elementDis.innerHTML = distance;
+      }
+      
+      function showHeading(heading) {
+        var head = heading;
+        var elementHead = document.getElementById('head');
+        elementHead.innerHTML = head;
+      }
+      
+      function calculateDistance(position1, position2)
+      {
+      	var R = 6371; // km
+		var lat1 = position1.coords.latitude;
+		var lat2 = position2.coords.latitude;
+		var lon1 = position1.coords.longitude;
+		var lon2 = position2.coords.longitude;
+		var dLat = convertDegreesToRadians(lat2-lat1);
+		var dLon = convertDegreesToRadians(lon2-lon1); 
+		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(convertDegreesToRadians(lat1)) * Math.cos(convertDegreesToRadians(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c;
+		return d;
+      }
+      
+      function calculateBearing(position1, position2)
+	  {
+		var lat1 = position1.coords.latitude;
+		var lat2 = position2.coords.latitude;
+		var dLon = position1.coords.longitude - position2.coords.longitude;
+		var y = Math.sin(dLon) * Math.cos(lat2);
+		var x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+		var brng = Math.atan2(y, x);		
+		return (convertRadiansToDegrees(brng) + 360) % 360;
+      }
+      
+      function convertDegreesToRadians(angle)
+      {
+        return Math.PI * angle / 180.0;
+      }
+
+      function convertRadiansToDegrees(angle)
+      {
+        return 180.0 * angle / Math.PI;
+      }
+          
+      function onError() {
+        if (navigator.geolocation) {
+          contentString = "Error: The Geolocation service failed.";
+        } else {
+          contentString = "Error: Your Phone doesn't support geolocation. Are you in Siberia?";
+        }
+        var elementErr = document.getElementById('err');
+        elementErr.innerHTML = contentString;
+        var elementLat = document.getElementById('lat');
+        var elementLng = document.getElementById('lng');
+        elementLat.innerHTML = 'Failed';
+        elementLng.innerHTML = 'Failed';
+      }
+      
+      function onErrorHeading() {
+        if (navigator.compass) {
+          contentString = "Error: The compass service failed.";
+        } else {
+          contentString = "Error: Your Phone doesn't support compass. Are you heading North?";
+        }
+        var elementErr = document.getElementById('err');
+        elementErr.innerHTML = contentString;
+        var elementHead = document.getElementById('head');
+        elementHead.innerHTML = 'Failed';
+      }
+    </script>
   </body>
-</html>
+</html>​

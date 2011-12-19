@@ -23,7 +23,7 @@
 	</div>
     <script>
     
-      var options = { frequency: 1000 };
+      var options = { frequency: 500 };
       // Schaffhausen 
       //var searchPosition = { coords : { latitude : 47.707769, longitude : 8.641434 }};
       // Basel 
@@ -102,6 +102,7 @@
       	if (diff < 100) {
       		strength = 100 - diff;
       	}
+      	strength = Math.pow(strength/100, 2)*100;
       	return strength;
       }
       

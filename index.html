@@ -5,44 +5,48 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="fuchsjagd.js"></script>
 	<link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body style="font: 75% Lucida Grande, Trebuchet MS;margin:0">
     Latitude: <div id="lat">Loading Latitude...</div>
     Longitude: <div id="lng">Loading Longitude...</div>
-    Bearing: <div id="bear">Loading Bearing...</div>
-    Distance: <div id="dis">Loading Distance...</div>
     Heading: <div id="head">Loading Heading...</div>
     <div id="err"></div>
-    <div class="meter-wrap">
-	    <div id="position1" class="meter-value" style="background-color: #0a0; width: 0%;">
-	        <div id="position1text" class="meter-text">
-	            Basel
-	        </div>
-	    </div>
+    <div id="targets" class="targets">
 	</div>
     <script>
     
       var options = { frequency: 500 };
       // Schaffhausen 
-      //var searchPosition = { coords : { latitude : 47.707769, longitude : 8.641434 }};
+      var searchPosition0 = { coords : { latitude : 47.707769, longitude : 8.641434 }};
       // Basel 
-      var searchPosition = { coords : { latitude : 47.557422, longitude : 7.592572 }};
+      var searchPosition1 = { coords : { latitude : 47.557422, longitude : 7.592572 }};
+      // Lugano
+      var searchPosition2 = { coords : { latitude : 46.006508, longitude : 8.952312 }};
+      // Genf
+      var searchPosition3 = { coords : { latitude : 46.198391, longitude : 6.142291 }};
+      // Chur
+      var searchPosition4 = { coords : { latitude : 46.857264, longitude : 9.526734 }};
+      
+      // load
+      var targets = new Array(new target(searchPosition0, "Schaffhausen"),
+      						  new target(searchPosition1, "Basel"),
+      						  new target(searchPosition2, "Lugano"),
+      						  new target(searchPosition3, "Genf"),
+      						  new target(searchPosition4, "Chur")
+      						 );
+      
       var bearingToPosition = 0;
      // var myHeading = 0;
 	document.addEventListener("deviceready", onDeviceReady, false);    
     
       function onDeviceReady() {
-	      
 	      if (navigator.geolocation) {
 	        var elementLat = document.getElementById('lat');
 	        var elementLng = document.getElementById('lng');
-	        var elementBear = document.getElementById('bear');
-	        var elementDis = document.getElementById('dis');
 	        elementLat.innerHTML = 'Loading Latitude..';
 	        elementLng.innerHTML = 'Loading Longitude..';
-	        elementBear.innerHTML = 'Loading Bearing..';
-	        elementDis.innerHTML = 'Loading Distance..';
 	        navigator.geolocation.getCurrentPosition(showPosition, onError);
 	        // also monitor position as it changes
 	        navigator.geolocation.watchPosition(showPosition);
@@ -60,8 +64,11 @@
 	        onErrorHeading();
 	      }
 	      
-	      //document.addEventListener("menubutton", simulateBearChange, false);
+	      var tarElement = document.getElementById('targets');
+	      for (var i = 0; i < targets.length; i++) {
 	      
+	      	tarElement.innerHTML = tarElement.innerHTML + makeTarget(targets[i].name);
+	      }
       }
       
       function showPosition(position) {
@@ -71,120 +78,21 @@
         var elementLng = document.getElementById('lng');
         elementLat.innerHTML = lat;
         elementLng.innerHTML = lng;
-        var bearing = calculateBearing(position, searchPosition);
-        var elementBear = document.getElementById('bear');
-        elementBear.innerHTML = bearing;
-        bearingToPosition = bearing;
-        var distance = calculateDistance(position, searchPosition);
-        var elementDis = document.getElementById('dis');
-        elementDis.innerHTML = distance;
+        for (var i = 0; i < targets.length; i++) {
+        	targets[i].update(position);
+        }
       }
       
       function showHeading(heading) {
         var head = heading.magneticHeading;
         var elementHead = document.getElementById('head');
         elementHead.innerHTML = head;
-        var strength = calculateStrength(head, bearingToPosition);
-        document.getElementById('position1').style.width = strength+"%";
-      }
-      
-      function calculateStrength(heading, bearing) {
-      	var diff;
-      	var strength = 0;
-      	if (heading > bearing) {
-      		diff = heading - bearing;
-      	}else {
-      		diff = bearing - heading;
-      	}
-      	if (diff > 180) {
-      		diff = 360 - diff;
-      	}
-      	if (diff < 100) {
-      		strength = 100 - diff;
-      	}
-      	strength = Math.pow(strength/100, 2)*100;
-      	return strength;
-      }
-      
-      function calculateDistance(position1, position2)
-      {
-      	var R = 6371; // km
-		var lat1 = position1.coords.latitude;
-		var lat2 = position2.coords.latitude;
-		var lon1 = position1.coords.longitude;
-		var lon2 = position2.coords.longitude;
-		var dLat = convertDegreesToRadians(lat2-lat1);
-		var dLon = convertDegreesToRadians(lon2-lon1); 
-		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(convertDegreesToRadians(lat1)) * Math.cos(convertDegreesToRadians(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
-		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-		var d = R * c;
-		return d;
-      }
-      
-      function calculateBearing(position1, position2)
-	  {
-		var lat1 = position1.coords.latitude;
-		var lat2 = position2.coords.latitude;
-		var dLon = position1.coords.longitude - position2.coords.longitude;
-		var y = Math.sin(dLon) * Math.cos(lat2);
-		var x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
-		var brng = Math.atan2(y, x);		
-		return (convertRadiansToDegrees(brng) + 360) % 360;
-      }
-      
-      function convertDegreesToRadians(angle)
-      {
-        return Math.PI * angle / 180.0;
-      }
-
-      function convertRadiansToDegrees(angle)
-      {
-        return 180.0 * angle / Math.PI;
-      }
-          
-      function onError() {
-        if (navigator.geolocation) {
-          contentString = "Error: The Geolocation service failed.";
-        } else {
-          contentString = "Error: Your Phone doesn't support geolocation. Are you in Siberia?";
+        
+        for (var i = 0; i < targets.length; i++) {
+        	var strength = targets[i].getStrength(head);
+        	document.getElementById(targets[i].name).style.width = strength+"%";
         }
-        var elementErr = document.getElementById('err');
-        elementErr.innerHTML = contentString;
-        var elementLat = document.getElementById('lat');
-        var elementLng = document.getElementById('lng');
-        elementLat.innerHTML = 'Failed';
-        elementLng.innerHTML = 'Failed';
       }
-      
-      function onErrorHeading() {
-        if (navigator.compass) {
-          contentString = "Error: The compass service failed.";
-        } else {
-          contentString = "Error: Your Phone doesn't support compass. Are you heading North?";
-        }
-        var elementErr = document.getElementById('err');
-        elementErr.innerHTML = contentString;
-        var elementHead = document.getElementById('head');
-        elementHead.innerHTML = 'Failed';
-      }
-      
-/*      function simulateBearChange() {
-      	simulateBearing();
-        var elementHead = document.getElementById('head');
-        elementHead.innerHTML = myHeading;
-      }
-      
-      function simulateBearing() {
-      	var r = Math.random();
-      	var isPositive = (r > 0.5);
-      	r = Math.random();
-      	var change = r*45;
-      	if (isPositive) {
-      	  myHeading = (myHeading + change + 360) % 360;
-      	} else {
-      	  myHeading = (myHeading - change + 360) % 360;
-      	} 
-      } */
     </script>
   </body>
 </html>​

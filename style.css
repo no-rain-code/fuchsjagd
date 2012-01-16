@@ -1,5 +1,33 @@
+body, .message, .error, .messureText{
+	color:#0a0;
+	background:#000000;
+}
+
+.message{
+	text-indent: 1em; 
+	font-size: 2.5em; 
+	vertical-align: middle;
+}
+
+.error{
+	color:#ff0000; 
+	text-indent: 1em; 
+	font-size: 2.5em; 
+	vertical-align: middle;
+}
+
+.messureText{
+	text-indent: .5em; 
+	font-size: 1.5em;
+}
+
 .meter-wrap{
     position: relative;
+    width: 100%;
+}
+
+.betweenTargets{
+	line-height: 1;
 }
 
 .meter-wrap, .meter-value, .meter-text {
@@ -8,7 +36,8 @@
 }
 
 .meter-wrap, .meter-value {
-    background: #bdbdbd url(/path/to/your-image.png) top left no-repeat;
+    background: #bdbdbd url(img/meter-outline.png) top left no-repeat;    
+    text-align: center;
 }
             
 .meter-text {
@@ -17,7 +46,33 @@
 
     padding-top: 5px;
                 
-    color: #fff;
+    color: #000;
     text-align: center;
     width: 100%;
+}
+
+.meter-space{
+	width: 20px; height: 30px;
+}
+
+.container {
+	position: relative;
+	margin: 0 auto;
+	width: 283px;
+	overflow: hidden;
+}
+
+.compass {}
+
+.needle {
+	position: absolute;
+	right:20px;
+	-webkit-transform:rotate(90deg); 
+	transform:rotate(90deg);
+}
+
+.reload {
+	position:absolute;
+	right:20px;
+	bottom:20px;	
 }

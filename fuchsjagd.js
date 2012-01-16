@@ -93,5 +93,9 @@ function onErrorHeading() {
 }
 
 function makeTarget(name) {
-	return "<div class='meter-wrap'><div id=" + name + " class='meter-value' style='background-color: #0a0; width: 0%;'><div id=" + name + "text' class='meter-text'>"+ name + "</div></div></div>";
+	return "<div class='meter-wrap'><div id=" + name + " class='meter-value' style='background-color: #0a0; width: 0%;'><div id=" + name + "text' class='meter-text'>"+ name + "</div></div></div><div class='betweenTargets'>&nbsp;</div>";
+}
+
+function makeCompass() {
+	return "<img id='needle' class='needle' src='img/compass-pin.png'/>";
 }

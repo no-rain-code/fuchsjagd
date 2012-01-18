@@ -69,7 +69,10 @@ var contentString;
 
 // Error handling
 function onError() {
+	loading = -1;
 	clearTimeout(t);
+	clearTimeout(errorHeading);
+	clearTimeout(errorLoading);
 	clearView();
 	$('#space').css("lineHeight","4");
 	if (navigator.geolocation) {
@@ -82,7 +85,10 @@ function onError() {
 	  
 
 function onErrorHeading() {
+	loading = -1;
 	clearTimeout(t);
+	clearTimeout(errorPosition);
+	clearTimeout(errorLoading);
 	clearView();
 	$('#space').css("lineHeight","4");
     if (navigator.compass) {
@@ -94,7 +100,10 @@ function onErrorHeading() {
 }
 
 function onErrorLoading() {
+	loading = -1;
 	clearTimeout(t);
+	clearTimeout(errorPosition);
+	clearTimeout(errorHeading);
 	clearView();
 	$('#space').css("lineHeight","4");
 	contentString = "Error: Connection to Fuchsjagd Backend failed.";

@@ -38,6 +38,8 @@
 		var targetsHidden = true;
 		var t = setTimeout("onLoading()", 300);
 		var errorLoading; 
+		var errorPosition;
+		var errorHeading;
 		// global div elements
 		var divLatitude = $('#lat');
 		var divLongitude = $('#lng');
@@ -66,6 +68,8 @@
 
 		function onDeviceReady() {
 			errorLoading = setTimeout("onErrorLoading()",20000);
+			errorPosition = setTimeout("onError()", 40000);
+			errorHeading = setTimeout("onErrorHeading()", 45000);
 			$.getJSON('http://fuchsjagd.ep.io/api/silent-mountain82/?callback=?', onDataLoaded);
 		}
 
@@ -93,6 +97,7 @@
 			} else {
 				onError();
 			}
+			clearTimeout(errorPosition);
 
 			if (navigator.compass) {
 				navigator.compass.getCurrentHeading(showHeading, onErrorHeading, options);
@@ -100,6 +105,7 @@
 			} else {
 				onErrorHeading();
 			}
+			clearTimeout(errorHeading);
 		}
 		
 		function resetAfterLoading() {
@@ -111,7 +117,7 @@
 			}
 		}
 
-		function showPosition(position) {
+		function showPosition(position) {	
 			positionReady = true;
 			if (headingReady == true) {
 				resetAfterLoading();

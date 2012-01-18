@@ -24,7 +24,7 @@
     </div>
 	<script>
 		var options = {
-			frequency : 150
+			frequency : 200
 		};
 
 		// load
@@ -162,7 +162,17 @@
 			document.getElementById('targets').innerHTML = '';
 		}
 		
+		var compassFixed = false;
+		
+		function fixCompass() {
+			compassFixed = !compassFixed;
+		}
+		
 		function adjustNeedle(heading) {
+			if (!compassFixed) {
+				$("#compass").css("-webkit-transform","rotate(-" + heading + "deg)");
+		        $("#compass").css("transform","rotate(-" + heading + "deg)");
+			}
 	        $("#needle").css("-webkit-transform","rotate(-" + heading + "deg)");
 	        $("#needle").css("transform","rotate(-" + heading + "deg)");
 		}

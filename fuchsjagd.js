@@ -115,5 +115,5 @@ function makeTarget(name) {
 }
 
 function makeCompass() {
-	return "<img id='needle' class='needle' src='img/compass-pin.png'/>";
+	return "<img id='compass' class='needle' src='img/compass-back.png'/><img id='needle' class='needle' src='img/compass-pin.png' onclick='fixCompass();'/>";
 }

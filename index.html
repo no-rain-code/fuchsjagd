@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
-<script type="text/javascript" charset="utf-8" src="jquery-1.7.1.js"></script>
-<script type="text/javascript"
-	src="http://maps.google.com/maps/api/js?sensor=true"></script>
-<script type="text/javascript" src="fuchsjagd.js"></script>
-<link rel="stylesheet" type="text/css" href="style.css">
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
+	<script type="text/javascript" charset="utf-8" src="jquery-1.7.1.js"></script>
+	<script type="text/javascript"
+		src="http://maps.google.com/maps/api/js?sensor=true"></script>
+	<script type="text/javascript" src="fuchsjagd.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body style="font: 75% Lucida Grande, Trebuchet MS; margin: 0">
 	<div id="space" style="line-height: 4;">&nbsp;</div>
@@ -26,57 +26,26 @@
 		var options = {
 			frequency : 150
 		};
-		// Schaffhausen 
-		var searchPosition0 = {
-			coords : {
-				latitude : 47.707769,
-				longitude : 8.641434
-			}
-		};
-		// Basel 
-		var searchPosition1 = {
-			coords : {
-				latitude : 47.557422,
-				longitude : 7.592572
-			}
-		};
-		// Lugano
-		var searchPosition2 = {
-			coords : {
-				latitude : 46.006508,
-				longitude : 8.952312
-			}
-		};
-		// Genf
-		var searchPosition3 = {
-			coords : {
-				latitude : 46.198391,
-				longitude : 6.142291
-			}
-		};
-		// Chur
-		var searchPosition4 = {
-			coords : {
-				latitude : 46.857264,
-				longitude : 9.526734
-			}
-		};
 
 		// load
 		var targets;
-		//var targets = new Array(new target(searchPosition0, "Schaffhausen"),
-		//		new target(searchPosition1, "Basel"), new target(
-		//				searchPosition2, "Lugano"), new target(searchPosition3,
-		//				"Genf"), new target(searchPosition4, "Chur"));
 
 		var bearingToPosition = 0;
-		// var myHeading = 0;
 		var loading = 0;
 		var headingReady = false;
 		var positionReady = false;
 		var targetsHTML = '';
 		var targetsHidden = true;
 		var t = setTimeout("onLoading()", 300);
+		var errorLoading; 
+		// global div elements
+		var divLatitude = $('#lat');
+		var divLongitude = $('#lng');
+		var divHeading = $('#head');
+		var divMessage = $('#msg');
+		var divError = $('#err');
+		var divTargets = null;
+		
 		document.addEventListener("deviceready", onDeviceReady, false);
 		
 		function onLoading() {
@@ -90,18 +59,20 @@
 				for (var i = 0; loading > i; i++) {
 					points = points + '.';
 				}
-				var elementMsg = document.getElementById('msg');
-				elementMsg.innerHTML = 'Loading' + points;
+				divMessage.html('Loading' + points);
 				var t = setTimeout("onLoading()", 300);
 			}
 		}
 
 		function onDeviceReady() {
+			errorLoading = setTimeout("onErrorLoading()",20000);
 			$.getJSON('http://fuchsjagd.ep.io/api/silent-mountain82/?callback=?', onDataLoaded);
 		}
 
 		function onDataLoaded(data) {
+			clearTimeout(errorLoading);
 			targets = new Array(data[0].senders.length);
+			divTargets = new Array(data[0].senders.length);
 			$.each(data[0].senders, function(i,sender){
       			var searchPosition = {
 					coords : {
@@ -112,30 +83,22 @@
 				targets[i] = new target(searchPosition,"Target-" + (i+1));
     		});
 			
+			for ( var i = 0; i < targets.length; i++) {
+				targetsHTML = targetsHTML + makeTarget(targets[i].name);
+			}
+			
 			if (navigator.geolocation) {
-				//var elementLat = document.getElementById('lat');
-				//var elementLng = document.getElementById('lng');
-				//elementLat.innerHTML = 'Loading Latitude..';
-				//elementLng.innerHTML = 'Loading Longitude..';
 				navigator.geolocation.getCurrentPosition(showPosition, onError);
-				// also monitor position as it changes
 				navigator.geolocation.watchPosition(showPosition);
 			} else {
 				onError();
 			}
 
 			if (navigator.compass) {
-				//var elementHead = document.getElementById('head');
-				//elementHead.innerHTML = 'Loading Heading';
 				navigator.compass.getCurrentHeading(showHeading, onErrorHeading, options);
-				// also monitor heading as it changes
 				navigator.compass.watchHeading(showHeading, onErrorHeading, options);
 			} else {
 				onErrorHeading();
-			}
-			
-			for ( var i = 0; i < targets.length; i++) {
-				targetsHTML = targetsHTML + makeTarget(targets[i].name);
 			}
 		}
 		
@@ -144,7 +107,7 @@
 				loading = -1;
 				clearTimeout(t);
 				clearView();
-				document.getElementById('space').style.lineHeight = '2';
+				$('#space').css("lineHeight","2");
 			}
 		}
 
@@ -152,12 +115,8 @@
 			positionReady = true;
 			if (headingReady == true) {
 				resetAfterLoading();
-				var lat = position.coords.latitude;
-				var lng = position.coords.longitude;
-				var elementLat = document.getElementById('lat');
-				var elementLng = document.getElementById('lng');
-				elementLat.innerHTML = "Latitude: " + lat;
-				elementLng.innerHTML = "Longitude: " + lng;
+				divLatitude.html("Latitude: " + position.coords.latitude);
+				divLongitude.html("Longitude: " + position.coords.longitude);
 				for ( var i = 0; i < targets.length; i++) {
 					targets[i].update(position);
 				}
@@ -169,20 +128,21 @@
 			if (positionReady == true) {
 				resetAfterLoading();
 				var head = heading.magneticHeading;
-				var elementHead = document.getElementById('head');
-				elementHead.innerHTML = "Heading: " + head;
-	
+				
 				if (targetsHidden) {
-					document.getElementById('targets').innerHTML = targetsHTML;
+					$('#targets').html(targetsHTML);
 					targetsHidden = false;
+					for (var i = 0; i < targets.length; i++) {
+						divTargets[i] = $('#' + targets[i].name);	
+					}
+					divHeading.html(makeCompass());			
 				}
 	
 				for ( var i = 0; i < targets.length; i++) {
 					var strength = targets[i].getStrength(head);
-					document.getElementById(targets[i].name).style.width = strength + "%";
+					divTargets[i].css("width", strength + "%");
+					//$("#" + targets[i].name).css("width", strength + "%");
 				}
-				
-				elementHead.innerHTML = makeCompass();
 				adjustNeedle(head);
 			}
 		}
@@ -203,15 +163,16 @@
 		
 		function reload() {
 			clearView();
-			document.getElementById('msg').innerHTML = 'Loading';
-			document.getElementById('space').style.lineHeight = '4';
+			divMessage.html('Loading');
+			$('#space').css("lineHeight","4");
 			targets = new Array();
 			loading = 0;
 			headingReady = false;
 			positionReady = false;
 			targetsHTML = '';
 			targetsHidden = true;
-			t = setTimeout("onLoading()", 300);
+			clearTimeout(t);
+			t = setTimeout('onLoading()', 300);
 			onDeviceReady();
 		}
 	</script>

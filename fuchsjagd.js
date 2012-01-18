@@ -65,35 +65,44 @@ function convertRadiansToDegrees(angle) {
 	return 180.0 * angle / Math.PI;
 }
 
+var contentString;
+
 // Error handling
 function onError() {
+	clearTimeout(t);
+	clearView();
+	$('#space').css("lineHeight","4");
 	if (navigator.geolocation) {
 		contentString = "Error: The Geolocation service failed.";
 	} else {
 		contentString = "Error: Your Phone doesn't support geolocation. Are you in Siberia?";
 	}
-	var elementErr = document.getElementById('err');
-	elementErr.innerHTML = contentString;
-	var elementLat = document.getElementById('lat');
-	var elementLng = document.getElementById('lng');
-	elementLat.innerHTML = 'Failed';
-	elementLng.innerHTML = 'Failed';
+	divError.html(contentString);
 }
 	  
+
 function onErrorHeading() {
+	clearTimeout(t);
+	clearView();
+	$('#space').css("lineHeight","4");
     if (navigator.compass) {
     	contentString = "Error: The compass service failed.";
 	} else {
 		contentString = "Error: Your Phone doesn't support compass. Are you heading North?";
 	}
-	var elementErr = document.getElementById('err');
-	elementErr.innerHTML = contentString;
-	var elementHead = document.getElementById('head');
-	elementHead.innerHTML = 'Failed';
+	divError.html(contentString);
+}
+
+function onErrorLoading() {
+	clearTimeout(t);
+	clearView();
+	$('#space').css("lineHeight","4");
+	contentString = "Error: Connection to Fuchsjagd Backend failed.";
+	divError.html(contentString);
 }
 
 function makeTarget(name) {
-	return "<div class='meter-wrap'><div id=" + name + " class='meter-value' style='background-color: #0a0; width: 0%;'><div id=" + name + "text' class='meter-text'>"+ name + "</div></div></div><div class='betweenTargets'>&nbsp;</div>";
+	return "<div class='meter-wrap'><div id=" + name + " class='meter-value' style='background-color: #0a0; width: 0%;'><div id='" + name + "text' class='meter-text'>"+ name + "</div></div></div><div class='betweenTargets'>&nbsp;</div>";
 }
 
 function makeCompass() {
